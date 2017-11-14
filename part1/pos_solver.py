@@ -21,7 +21,7 @@ where P(W, S) = {P(S1) * P(W1 | S1) * P(S2 | S1) * P(W2 | S2) * P(S3 | S2) * P(W
 on taking the log,
 log{P(W | S)} = log{P(W, S)} - log{P(S)}
 log{P(W | S)} = {log P(S1) + log P(W1 | S1) + log P(S2 | S1) + log P(W2 | S2) + log P(S3 | S2) + ...} - log{P(S)}
-
+If any combination of transition probabaility or emission probability is missing then we have assumed it to be equal to 0.00000000000000000000000000000001: a random value.
 ''' 
 ####
 
@@ -109,34 +109,19 @@ class Solver:
                             self.state_transition[(state[i], state[i + 1])] = 1
                         else:
                             self.state_transition[(state[i], state[i + 1])] += 1
-                    else:
-                        if (state[i], "END") not in self.state_transition:
-                            self.state_transition[(state[i], "END")] = 1
-                        else:
-                            self.state_transition[(state[i], "END")] += 1
-                    
-                    #add the emission probabilites P(W_i, S_i)
+                                                  
+                    #add the emission probabilites P(W_i | S_i)
                     if (words[i], state[i]) not in self.word_emission:
                         self.word_emission[(words[i], state[i])] = 1
                     else:
                         self.word_emission[(words[i], state[i])] += 1
-                            
-                    
-        #print 'Words: ', words
-        #print 'State: ', state
-        
-        #print '\nWORD DICTIONARY: \n', self.word_dict
-        #print '\nSTATE DICTIONARY: \n', self.state_dict
-        #print '\nWORD INITIAL: \n', self.word_initial
-        #print '\nSTATE TRANSITION \n', self.state_transition
-        #print '\nWORD EMISSION \n', self.word_emission
         
         #converting to probability:
-        self.word_dict = dict((key, float(value) / sum(self.word_dict.values())) for (key, value) in self.word_dict.items())
-        self.state_dict = dict((key, float(value) / sum(self.state_dict.values())) for (key, value) in self.state_dict.items())
+        self.word_dict = dict((key, (float(value) / float(sum(self.word_dict.values())))) for (key, value) in self.word_dict.items())
+        self.state_dict = dict((key, (float(value) / float(sum(self.state_dict.values())))) for (key, value) in self.state_dict.items())
         
-        self.state_transition = dict((key, float(value) / sum(self.state_transition.values())) for (key, value) in self.state_transition.items())
-        self.word_emission = dict((key, float(value) / sum(self.word_emission.values())) for (key, value) in self.word_emission.items())
+        self.state_transition = dict((key, float(value) / float(sum(self.state_transition.values()))) for (key, value) in self.state_transition.items())
+        self.word_emission = dict((key, float(value) / float(sum(self.word_emission.values()))) for (key, value) in self.word_emission.items())
         
         #To add the probabilities of events that were not encountered in the training dataset
         for word in self.word_dict:
@@ -150,10 +135,6 @@ class Solver:
                 if (word, state1) not in self.word_emission:
                     self.word_emission[(word, state1)] = 0.00000000000000000000000000000001
         
-        #print '\nWORD PROB: \n', self.word_dict
-        #print '\nSTATE PROB: \n', self.state_dict
-        #print '\nWORD EMISSION PROB \n', self.word_emission
-        
         pass
 
     # Functions for each algorithm.
@@ -164,16 +145,15 @@ class Solver:
             max_prob = 0
             max_prob_arg = ''
             for state, value in self.state_dict.items():
-                #denominator can be removed for faster computation
                 if (word, state) in self.word_emission:
-                    prob = float(self.word_emission[(word, state)] * value)
-                    if prob > max_prob:
+                    #since the denominator is common for all the states, we can skip it: equal to the prior probability of the word
+                    prob = value * self.word_emission[(word, state)]
+                    if prob >= max_prob:
                         max_prob = prob
                         max_prob_arg = state
             sequence.append(max_prob_arg)
             
         return sequence
-        #return ["noun"] * len(sentence)
 
     def hmm_ve(self, sentence):
         sequence = []
@@ -215,7 +195,6 @@ class Solver:
             sequence.append(states[max_prob_arg])
         
         return sequence
-        #return ["noun"] * len(sentence)
         
     def hmm_viterbi(self, sentence):
         sequence = []
@@ -263,7 +242,6 @@ class Solver:
             sequence.append(states[max_prob_arg])
         
         return sequence
-        #return ["noun"] * len(sentence)
 
     # This solve() method is called by label.py, so you should keep the interface the
     #  same, but you can change the code itself. 
