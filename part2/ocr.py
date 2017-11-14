@@ -121,6 +121,42 @@ def simplified(test_letters):
 
     return pred_test_str
 
+def hmm_ve(test_letters):
+    pred_test_str = ''
+    var_el = np.zeros((len(TRAIN_LETTERS), len(test_letters)))
+
+    for i in range(len(test_letters)):
+        sub_img = test_letters[i]
+        for j in range(len(TRAIN_LETTERS)):
+            letter = TRAIN_LETTERS[j]
+
+            if i == 0:
+
+                if letter in letter_initial:
+                    var_el[j, 0] = letter_initial[letter] * emission_probability(sub_img, letter)
+                else:
+                    var_el[j, 0] = emission_probability(sub_img, letter)
+            else:
+                temp_sum = 0.0
+                ##Variable elimination
+                for k in range(len(TRAIN_LETTERS)):
+                    letter_prev = TRAIN_LETTERS[k]
+                    if (letter_prev.lower(), letter.lower()) in letter_transition:
+                        if (letter_prev, letter.lower()) in letter_transition:
+                            trans_prob = min(letter_transition[(letter_prev, letter.lower())], letter_transition[(letter_prev.lower(), letter.lower())])
+                        else:
+                            trans_prob = letter_transition[(letter_prev.lower(), letter.lower())]
+                        temp_sum += (var_el[k, i - 1] * trans_prob)
+                    else:
+                        temp_sum += 0.000000001
+
+                var_el[j, i] = temp_sum * emission_probability(sub_img, letter)
+
+        max_prob_arg = np.argmax(var_el[:, i])
+        pred_test_str += TRAIN_LETTERS[max_prob_arg]
+
+    return pred_test_str
+
 
 def hmm_viterbi(test_letters):
     pred_test_str = ''
@@ -175,6 +211,7 @@ letter_initial, letter_dict, letter_transition = train(read_data(train_txt_fname
 
 ''' Implement the three methods for character recognition '''
 
-print "Simplified:  "+simplified(test_images)
-print "HMM Viterbi: "+hmm_viterbi(test_images)
+print " Simple: "+simplified(test_images)
+print " HMM VE: "+hmm_ve(test_images)
+print "HMM MAP: "+hmm_viterbi(test_images)
 
