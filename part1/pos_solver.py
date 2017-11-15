@@ -22,6 +22,24 @@ on taking the log,
 log{P(W | S)} = log{P(W, S)} - log{P(S)}
 log{P(W | S)} = {log P(S1) + log P(W1 | S1) + log P(S2 | S1) + log P(W2 | S2) + log P(S3 | S2) + ...} - log{P(S)}
 If any combination of transition probabaility or emission probability is missing then we have assumed it to be equal to 0.00000000000000000000000000000001: a random value.
+
+
+Command: python label.py bc.train bc.test
+Output: This is the last block or sentence of the output:
+    
+----
+                          : it's late and  you  said they'd be   here by   dawn ''   .
+ 0. Ground truth ( -63.05): prt  adv  conj pron verb prt    verb adv  adp  noun .    .
+   1. Simplified ( -62.14): prt  adj  conj pron verb prt    verb adv  adp  noun .    .
+       2. HMM VE ( -62.14): prt  adj  conj pron verb prt    verb adv  adp  noun .    .
+      3. HMM MAP ( -62.14): prt  adj  conj pron verb prt    verb adv  adp  noun .    .
+      
+==> So far scored 2000 sentences with 29442 words.
+                   Words correct:     Sentences correct:
+   0. Ground truth:      100.00%              100.00%
+     1. Simplified:       90.53%               33.50%
+         2. HMM VE:       91.64%               40.70%
+        3. HMM MAP:       91.55%               40.80%
 ''' 
 ####
 
