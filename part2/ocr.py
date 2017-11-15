@@ -98,7 +98,7 @@ def emission_probability(test_img, train_ltr):
             if test_img[i][j] == train_img[i][j]:
                 cond_prob =  cond_prob * 0.95
             else:
-                cond_prob = cond_prob * 0.10
+                cond_prob = cond_prob * 0.40
 
     return cond_prob
 
